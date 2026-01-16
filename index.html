@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Bank | Ultra</title>
+    <style>
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --sub: #64748b;
+            --primary: #1e3a8a; --accent: #3b82f6; --success: #10b981; --border: #e2e8f0;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
+            --primary: #3b82f6; --accent: #60a5fa; --success: #34d399; --border: #334155;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #cbd5e1; margin: 0; display: flex; justify-content: center; transition: 0.3s; }
+        .app-container { width: 100%; max-width: 412px; height: 100vh; background: var(--bg); color: var(--text); position: relative; overflow-y: auto; scrollbar-width: none; }
+
+        /* Auth Screens */
+        .auth-screen { padding: 60px 30px; text-align: center; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+        .logo { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
+        input { padding: 16px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; margin-bottom: 15px; background: var(--card); color: var(--text); outline: none; width: 100%; box-sizing: border-box;}
+        .btn { background: var(--primary); color: white; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        /* Dashboard & Components */
+        #dashboard { display: none; padding: 20px; animation: fadeIn 0.5s ease; }
+        .virtual-card { background: linear-gradient(135deg, #0f172a, #334155); border-radius: 20px; padding: 25px; color: white; margin-bottom: 25px; }
+        .chart-container { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-top: 25px; }
+        .chart-bar-bg { width: 100%; height: 8px; background: var(--border); border-radius: 4px; margin-top: 5px; overflow: hidden; }
+        .chart-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 1s ease; }
+
+        .goals-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .goal-card { min-width: 150px; background: var(--card); padding: 15px; border-radius: 18px; border: 1px solid var(--border); }
+        .transaction { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="signup-screen" class="auth-screen hidden">
+            <div class="logo">NEXUS</div>
+            <h3 style="margin-bottom: 30px;">Create Your Account</h3>
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="password" id="reg-pin" placeholder="Create 4-Digit PIN" maxlength="4" inputmode="numeric">
+            <button class="btn" onclick="Nexus.register()">Start Banking</button>
+            <p style="margin-top: 20px; font-size: 0.9rem;">Already have an account? <a href="#" onclick="Nexus.showLogin()" style="color:var(--accent)">Login</a></p>
+        </div>
+
+        <div id="login-screen" class="auth-screen">
+            <div class="logo">NEXUS</div>
+            <p id="welcome-back" style="color:var(--sub); margin-bottom: 30px;">Welcome back</p>
+            <input type="password" id="login-pin" placeholder="Enter PIN" maxlength="4" inputmode="numeric">
+            <button class="btn" onclick="Nexus.login()">Sign In</button>
+            <p style="margin-top: 20px; font-size: 0.9rem;">New here? <a href="#" onclick="Nexus.showSignup()" style="color:var(--accent)">Sign Up</a></p>
+        </div>
+
+        <div id="dashboard">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <div style="color:var(--sub); font-size: 0.8rem;">Nexus Elite</div>
+                    <div style="font-weight: 800; font-size: 1.2rem;" id="user-display">User</div>
+                </div>
+                <button onclick="Nexus.logout()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer;">🚪</button>
+            </header>
+
+            <div class="virtual-card">
+                <div style="opacity: 0.7; font-size: 0.8rem; margin-bottom: 15px;">NEXUS PLATINUM</div>
+                <div style="font-family: monospace; font-size: 1.3rem; letter-spacing: 2px;">•••• •••• •••• 4290</div>
+            </div>
+
+            <div style="color:var(--sub); font-size: 0.9rem;">Total Balance</div>
+            <div style="font-size: 2.5rem; font-weight: 800; margin: 5px 0;" id="balance-display">$12,450.00</div>
+
+            <div class="chart-container">
+                <h4 style="margin: 0 0 15px 0;">Monthly Spending</h4>
+                <div style="font-size:0.8rem; display:flex; justify-content:space-between;"><span>Shopping</span><span>45%</span></div>
+                <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: 45%;"></div></div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Saving Vaults</h3>
+            <div id="goals-list" class="goals-container"></div>
+
+            <h3 style="margin-top: 30px;">Activity</h3>
+            <div id="tx-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const Nexus = {
+            user: JSON.parse(localStorage.getItem('nexus_user')) || null,
+            balance: 12450.00,
+
+            init() {
+                if (this.user) {
+                    document.getElementById('welcome-back').innerText = `Welcome back, ${this.user.name}`;
+                    this.showLogin();
+                } else {
+                    this.showSignup();
+                }
+            },
+
+            showSignup() {
+                document.getElementById('signup-screen').classList.remove('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard').style.display = 'none';
+            },
+
+            showLogin() {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('signup-screen').classList.add('hidden');
+                document.getElementById('dashboard').style.display = 'none';
+            },
+
+            register() {
+                const name = document.getElementById('reg-name').value;
+                const pin = document.getElementById('reg-pin').value;
+                if (name && pin.length === 4) {
+                    this.user = { name, pin };
+                    localStorage.setItem('nexus_user', JSON.stringify(this.user));
+                    this.enter();
+                } else {
+                    alert("Please enter your name and a 4-digit PIN");
+                }
+            },
+
+            login() {
+                const pin = document.getElementById('login-pin').value;
+                if (this.user && pin === this.user.pin) {
+                    this.enter();
+                } else {
+                    alert("Invalid PIN");
+                }
+            },
+
+            enter() {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('signup-screen').classList.add('hidden');
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('user-display').innerText = this.user.name;
+                this.render();
+            },
+
+            logout() {
+                location.reload();
+            },
+
+            render() {
+                document.getElementById('balance-display').innerText = `$${this.balance.toLocaleString()}`;
+                document.getElementById('goals-list').innerHTML = `
+                    <div class="goal-card">
+                        <div style="font-size:0.7rem; color:var(--sub); font-weight:bold;">Property Fund</div>
+                        <div style="font-size:1.1rem; font-weight:800; margin:5px 0;">$12,500</div>
+                        <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:25%; background:var(--success)"></div></div>
+                    </div>`;
+                document.getElementById('tx-list').innerHTML = `
+                    <div class="transaction">
+                        <div><div style="font-weight:bold;">Initial Deposit</div><div style="font-size:0.8rem; color:var(--sub);">Today</div></div>
+                        <div style="font-weight:bold; color:var(--success)">+$12,450.00</div>
+                    </div>`;
+            }
+        };
+
+        Nexus.init();
+    </script>
+</body>
+</html>
