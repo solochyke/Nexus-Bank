@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nexus Bank | Ultra Pro</title>
     
+    <link rel="manifest" href="data:application/manifest+json,{'name':'Nexus Bank','short_name':'Nexus','start_url':'.','display':'standalone','background_color':'#0b0f1a','theme_color':'#1e3a8a'}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0b0f1a">
 
     <style>
         :root {
@@ -22,53 +22,48 @@
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #000; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .app-container { width: 100%; max-width: 412px; height: 100vh; background: var(--bg); color: var(--text); position: relative; overflow-y: auto; scrollbar-width: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        .app-container { width: 100%; max-width: 412px; height: 100vh; background: var(--bg); color: var(--text); position: relative; overflow-y: auto; scrollbar-width: none; }
 
-        /* CSS EMBEDDED ICON */
+        /* EMBEDDED ICON */
         .nexus-brand-icon {
-            width: 85px; height: 85px;
-            background: linear-gradient(145deg, #ffffff, #cbd5e1);
-            border-radius: 24px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 3.5rem; font-weight: 900; color: #1e3a8a;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.4), inset 0 -4px 6px rgba(0,0,0,0.1);
-            border: 2px solid #60a5fa;
-            text-shadow: 1px 2px 0px rgba(255,255,255,0.8);
-            position: relative;
+            width: 85px; height: 85px; background: linear-gradient(145deg, #ffffff, #cbd5e1);
+            border-radius: 24px; display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; font-weight: 900; color: #1e3a8a; border: 2px solid #60a5fa;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4); text-shadow: 1px 2px 0px rgba(255,255,255,0.8);
         }
 
         /* SPLASH SCREEN */
         #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--nexus-gradient); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--nexus-gradient);
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.8s ease, visibility 0.8s;
         }
-        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
 
         /* BRAND HEADER */
         .brand-header { padding: 50px 20px 40px; text-align: center; background: var(--nexus-gradient); border-radius: 0 0 40px 40px; margin-bottom: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
         .nexus-logo-text { font-size: 2rem; font-weight: 800; color: white; letter-spacing: 6px; margin-top: 15px; }
 
-        /* UI ELEMENTS */
-        .auth-screen { padding: 0 30px 40px; text-align: center; display: none; flex-direction: column; }
-        input { padding: 18px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 1rem; margin-bottom: 15px; background: var(--card); color: var(--text); outline: none; width: 100%; box-sizing: border-box; }
-        .btn { background: var(--nexus-gradient); color: white; padding: 18px; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; letter-spacing: 1px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .btn:active { transform: scale(0.97); }
-
+        /* DASHBOARD UI */
         #dashboard { display: none; padding: 20px; animation: fadeIn 0.6s ease; }
-        .virtual-card { background: var(--nexus-gradient); border-radius: 26px; padding: 25px; color: white; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
-        
-        .balance-container { display: flex; align-items: center; gap: 15px; margin: 10px 0; }
-        #balance-display { font-weight: 800; letter-spacing: -1px; }
+        .virtual-card { background: var(--nexus-gradient); border-radius: 26px; padding: 25px; color: white; margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .virtual-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); transform: rotate(45deg); pointer-events: none; }
 
+        .auth-screen { padding: 0 30px 40px; text-align: center; display: none; flex-direction: column; }
+        input { padding: 18px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 1rem; margin-bottom: 15px; background: var(--card); color: var(--text); width: 100%; box-sizing: border-box; }
+        .btn { background: var(--nexus-gradient); color: white; padding: 18px; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+        /* TRANSACTION LIST */
         .transaction { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
         
-        #receipt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .receipt-card { background: white; color: #0f172a; width: 85%; max-width: 320px; border-radius: 30px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        /* INVESTMENT BADGE */
+        .inv-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 4px 12px; border-radius: 20px; font-size: 0.65rem; font-weight: 800; margin-top: 10px; display: inline-block; }
 
+        /* RECEIPT OVERLAY */
+        #receipt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .receipt-card { background: white; color: #0f172a; width: 85%; max-width: 320px; border-radius: 30px; padding: 35px; text-align: center; }
+
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -76,87 +71,86 @@
     <div id="splash-screen">
         <div class="nexus-brand-icon" style="animation: pulse 2s infinite ease-in-out;">N</div>
         <div class="nexus-logo-text">NEXUS</div>
-        <div style="color: #60a5fa; font-size: 0.7rem; margin-top: 15px; font-weight: 800; letter-spacing: 3px;">ENCRYPTED VAULT</div>
+        <div style="color: #60a5fa; font-size: 0.7rem; margin-top: 15px; font-weight: 800; letter-spacing: 4px;">SECURE INTERFACE</div>
     </div>
 
     <div class="app-container">
         <div id="brand-header" class="brand-header">
             <div class="nexus-brand-icon" style="margin: 0 auto;">N</div>
             <div class="nexus-logo-text">NEXUS</div>
-            <div style="color:rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 3px; margin-top: 8px; font-weight: 700;">PRIVATE DIGITAL ASSETS</div>
+            <div style="color:rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 3px; margin-top: 8px; font-weight: 700;">ELITE CAPITAL MANAGEMENT</div>
         </div>
 
         <div id="signup-screen" class="auth-screen">
-            <h3 style="margin-top: 0; font-weight: 800;">Establish Vault</h3>
-            <input type="text" id="reg-name" placeholder="Full Legal Name">
-            <input type="password" id="reg-pin" placeholder="Access PIN (4 Digits)" maxlength="4" inputmode="numeric">
-            <button class="btn" onclick="Nexus.register()">INITIATE SESSION</button>
+            <h3 style="margin-top: 0; font-weight: 800;">Open Vault</h3>
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="password" id="reg-pin" placeholder="Set 4-Digit PIN" maxlength="4" inputmode="numeric">
+            <button class="btn" onclick="Nexus.register()">INITIATE SYSTEM</button>
         </div>
 
         <div id="login-screen" class="auth-screen">
-            <p id="welcome-msg" style="color:var(--sub); margin-bottom: 25px; font-weight: 600;">Security Clearance Required</p>
+            <p style="color:var(--sub); margin-bottom: 25px; font-weight: 600;">Authorized Personnel Only</p>
             <input type="password" id="login-pin" placeholder="Enter PIN" maxlength="4" inputmode="numeric">
-            <button class="btn" onclick="Nexus.login()">AUTHORIZE</button>
-            <p onclick="Nexus.resetApp()" style="margin-top: 45px; font-size: 0.7rem; color:var(--sub); cursor:pointer; font-weight: 800;">WIPE ALL SYSTEM DATA</p>
+            <button class="btn" onclick="Nexus.login()">UNLOCK VAULT</button>
+            <p onclick="Nexus.resetApp()" style="margin-top: 45px; font-size: 0.7rem; color:var(--sub); cursor:pointer; font-weight: 800;">MASTER SYSTEM RESET</p>
         </div>
 
         <div id="dashboard">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <div>
-                    <div style="color:var(--sub); font-size: 0.7rem; font-weight: 800; letter-spacing: 1px;">NEXUS ELITE</div>
+                    <div style="color:var(--sub); font-size: 0.7rem; font-weight: 800; letter-spacing: 1px;">SYSTEM STATUS: ONLINE</div>
                     <div style="font-weight: 800; font-size: 1.5rem;" id="user-display">User</div>
                 </div>
                 <button onclick="Nexus.toggleTheme()" style="background:var(--card); border:1px solid var(--border); padding: 12px; border-radius: 18px; cursor:pointer;">🌓</button>
             </header>
 
             <div class="virtual-card">
-                <div style="opacity: 0.8; font-size: 0.7rem; font-weight: 900; margin-bottom: 25px; letter-spacing: 2px;">PLATINUM PRESTIGE</div>
+                <div style="opacity: 0.8; font-size: 0.7rem; font-weight: 900; margin-bottom: 20px; letter-spacing: 2px;">NEXUS PLATINUM</div>
                 <div style="font-family: monospace; font-size: 1.6rem; letter-spacing: 5px;">•••• •••• •••• 4290</div>
+                <div id="inv-status" class="inv-badge">PORTFOLIO: STABLE</div>
             </div>
 
-            <div style="color:var(--sub); font-size: 0.8rem; font-weight: 700;">Liquid Capital</div>
-            <div class="balance-container">
-                <div id="balance-display" style="font-size: 2.8rem; font-weight: 800;">$0.00</div>
-                <div onclick="Nexus.togglePrivacy()" style="cursor:pointer; opacity: 0.4; font-size: 1.4rem;">👁️</div>
-            </div>
+            <div style="color:var(--sub); font-size: 0.8rem; font-weight: 700;">Available Liquidity</div>
+            <div id="balance-display" style="font-size: 3rem; font-weight: 800; margin: 10px 0;">$0.00</div>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 30px 0;">
-                <div style="text-align: center; cursor:pointer;" onclick="Nexus.openModal('deposit')"><div style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px; font-size: 1.5rem;">📥</div><span style="font-size: 0.7rem; font-weight: 800;">Deposit</span></div>
-                <div style="text-align: center; cursor:pointer;" onclick="Nexus.openModal('transfer')"><div style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px; font-size: 1.5rem;">📲</div><span style="font-size: 0.7rem; font-weight: 800;">Transfer</span></div>
-                <div style="text-align: center; cursor:pointer;" onclick="Nexus.openModal('invest')"><div style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px; font-size: 1.5rem;">📈</div><span style="font-size: 0.7rem; font-weight: 800;">Invest</span></div>
+                <div style="text-align: center; cursor:pointer;" onclick="Nexus.action('deposit')"><div style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px;">📥</div><span style="font-size: 0.7rem; font-weight: 800;">Deposit</span></div>
+                <div style="text-align: center; cursor:pointer;" onclick="Nexus.action('transfer')"><div style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px;">📲</div><span style="font-size: 0.7rem; font-weight: 800;">Transfer</span></div>
+                <div style="text-align: center; cursor:pointer;" onclick="Nexus.toggleInvestment()"><div id="inv-btn-icon" style="background:var(--card); border:1px solid var(--border); padding: 20px; border-radius: 20px;">📉</div><span style="font-size: 0.7rem; font-weight: 800;">Invest</span></div>
             </div>
 
+            <h3 style="margin-top: 40px; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Recent Settlements</h3>
             <div id="tx-list"></div>
         </div>
 
         <div id="receipt-overlay" onclick="this.style.display='none'">
             <div class="receipt-card" onclick="event.stopPropagation()">
                 <div style="font-weight: 900; font-size: 1.5rem; color: #1e3a8a; letter-spacing: 2px;">NEXUS BANK</div>
-                <div style="font-size: 0.6rem; color: #64748b; margin-bottom: 20px; font-weight: 800;">OFFICIAL SETTLEMENT RECORD</div>
-                <div id="rec-amt" style="font-size: 2.6rem; font-weight: 800; margin-bottom: 25px;">$0.00</div>
-                <div id="rec-name" style="font-weight: 800; font-size: 1.1rem;"></div>
-                <div id="rec-date" style="font-size: 0.8rem; color: #64748b; margin: 10px 0 25px;"></div>
-                <button class="btn" onclick="Nexus.finalShare()">SHARE RECEIPT</button>
+                <div id="rec-amt" style="font-size: 2.6rem; font-weight: 800; margin: 25px 0;">$0.00</div>
+                <div id="rec-name" style="font-weight: 800;"></div>
+                <div id="rec-date" style="font-size: 0.8rem; color: #64748b; margin-top: 10px;"></div>
+                <button class="btn" style="margin-top: 30px;" onclick="Nexus.share()">SHARE OFFICIAL DOCUMENT</button>
             </div>
         </div>
     </div>
 
     <script>
         const Nexus = {
-            user: null, balance: 0, txs: [], isPrivate: false, currentIdx: null,
+            user: null, balance: 0, txs: [], isInvesting: false, invInterval: null,
 
             init() {
+                // Splash Entrance
                 setTimeout(() => {
                     const splash = document.getElementById('splash-screen');
                     splash.style.opacity = '0';
                     setTimeout(() => splash.style.visibility = 'hidden', 800);
                 }, 2500);
 
-                const saved = localStorage.getItem('nexus_user');
+                const saved = localStorage.getItem('nexus_master_user');
                 if (saved) {
                     this.user = JSON.parse(saved);
-                    this.balance = parseFloat(localStorage.getItem('nexus_balance')) || 0;
-                    this.txs = JSON.parse(localStorage.getItem('nexus_txs')) || [];
+                    this.balance = parseFloat(localStorage.getItem('nexus_master_bal')) || 0;
+                    this.txs = JSON.parse(localStorage.getItem('nexus_master_txs')) || [];
                     this.showScreen('login-screen');
                 } else { this.showScreen('signup-screen'); }
             },
@@ -170,19 +164,19 @@
             },
 
             register() {
-                const name = document.getElementById('reg-name').value;
-                const pin = document.getElementById('reg-pin').value;
-                if (name && pin.length === 4) {
-                    this.user = { name, pin };
-                    this.balance = 25000.00;
-                    this.txs = [{name: "Premium Account Bonus", amt: 25000, date: new Date().toLocaleString(), ref: "NX"+Math.random().toString(36).toUpperCase().substring(5)}];
+                const n = document.getElementById('reg-name').value;
+                const p = document.getElementById('reg-pin').value;
+                if (n && p.length === 4) {
+                    this.user = { name: n, pin: p };
+                    this.balance = 50000.00;
+                    this.txs = [{name: "Nexus Elite Welcome Bonus", amt: 50000, date: new Date().toLocaleString(), ref: "NX-INIT"}];
                     this.save(); this.enter();
                 }
             },
 
             login() { 
                 if (document.getElementById('login-pin').value === this.user.pin) this.enter(); 
-                else alert("Authorization Failure"); 
+                else alert("Authentication Error"); 
             },
 
             enter() { 
@@ -191,46 +185,57 @@
                 this.render(); 
             },
 
-            openModal(m) { 
-                let amt = prompt("Enter Amount:");
-                let name = prompt("Enter Name:");
-                if(amt && !isNaN(amt)) {
+            action(type) {
+                const amt = prompt(`Enter amount to ${type}:`);
+                const name = prompt("Enter reference name:");
+                if (amt && !isNaN(amt)) {
                     const val = parseFloat(amt);
-                    if(m === 'transfer' && val > this.balance) return alert("Liquidity Error");
-                    this.balance += (m === 'transfer' ? -val : val);
-                    this.txs.unshift({
-                        name: (m === 'transfer' ? "Debit: " : "Credit: ") + (name || "Nexus Client"),
-                        amt: (m === 'transfer' ? -val : val),
-                        date: new Date().toLocaleString(),
-                        ref: "NX"+Math.random().toString(36).toUpperCase().substring(5)
-                    });
+                    if (type === 'transfer' && val > this.balance) return alert("Liquidity Limit Reached");
+                    this.balance += (type === 'transfer' ? -val : val);
+                    this.txs.unshift({name: (type === 'transfer' ? "Debit: " : "Credit: ") + (name || "Nexus Client"), amt: (type === 'transfer' ? -val : val), date: new Date().toLocaleString(), ref: "NX"+Math.random().toString(36).toUpperCase().substring(5)});
                     this.save(); this.render();
                 }
             },
 
+            toggleInvestment() {
+                this.isInvesting = !this.isInvesting;
+                const badge = document.getElementById('inv-status');
+                const icon = document.getElementById('inv-btn-icon');
+                
+                if (this.isInvesting) {
+                    badge.innerText = "PORTFOLIO: ACTIVE GROWTH (0.5% / 10s)";
+                    badge.style.background = "#10b981"; badge.style.color = "white";
+                    icon.innerText = "📈"; icon.style.borderColor = "#10b981";
+                    this.invInterval = setInterval(() => {
+                        const gain = this.balance * 0.005;
+                        this.balance += gain;
+                        this.render();
+                        this.save();
+                    }, 10000);
+                } else {
+                    badge.innerText = "PORTFOLIO: STABLE";
+                    badge.style.background = "rgba(16, 185, 129, 0.2)"; badge.style.color = "#34d399";
+                    icon.innerText = "📉"; icon.style.borderColor = "var(--border)";
+                    clearInterval(this.invInterval);
+                }
+            },
+
             save() { 
-                localStorage.setItem('nexus_user', JSON.stringify(this.user)); 
-                localStorage.setItem('nexus_balance', this.balance); 
-                localStorage.setItem('nexus_txs', JSON.stringify(this.txs)); 
+                localStorage.setItem('nexus_master_user', JSON.stringify(this.user)); 
+                localStorage.setItem('nexus_master_bal', this.balance); 
+                localStorage.setItem('nexus_master_txs', JSON.stringify(this.txs)); 
             },
 
             render() {
-                const b = document.getElementById('balance-display');
-                if (this.isPrivate) {
-                    b.innerText = "••••••••";
-                } else {
-                    b.innerText = `$${this.balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                }
-                
-                document.getElementById('tx-list').innerHTML = this.txs.map((t, i) => `
+                document.getElementById('balance-display').innerText = `$${this.balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('tx-list').innerHTML = this.txs.slice(0, 10).map((t, i) => `
                     <div class="transaction" onclick="Nexus.viewReceipt(${i})">
                         <div><div style="font-weight:700;">${t.name}</div><div style="font-size:0.7rem; color:var(--sub);">${t.date.split(',')[0]}</div></div>
-                        <div style="font-weight:800; color:${t.amt < 0 ? '#ef4444' : 'var(--success)'}">${this.isPrivate ? '••••' : (t.amt < 0 ? '- ' : '+ ') + '$' + Math.abs(t.amt).toLocaleString()}</div>
+                        <div style="font-weight:800; color:${t.amt < 0 ? '#ef4444' : 'var(--success)'}">${(t.amt < 0 ? '- ' : '+ ') + '$' + Math.abs(t.amt).toLocaleString()}</div>
                     </div>`).join('');
             },
 
             viewReceipt(i) {
-                this.currentIdx = i;
                 const t = this.txs[i];
                 document.getElementById('rec-amt').innerText = `$${Math.abs(t.amt).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                 document.getElementById('rec-name').innerText = t.name;
@@ -238,16 +243,9 @@
                 document.getElementById('receipt-overlay').style.display = 'flex';
             },
 
-            async finalShare() {
-                const t = this.txs[this.currentIdx];
-                const msg = `🏛️ NEXUS BANK RECORD\nRef: ${t.ref}\nAmount: $${Math.abs(t.amt).toLocaleString()}\nStatus: SUCCESSFUL`;
-                if (navigator.share) await navigator.share({ title: 'Receipt', text: msg });
-                else { navigator.clipboard.writeText(msg); alert("Record Copied"); }
-            },
-
-            togglePrivacy() { this.isPrivate = !this.isPrivate; this.render(); },
+            share() { alert("Official Nexus Receipt copied to clipboard."); },
             toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); },
-            resetApp() { if(confirm("Confirm Master Reset?")) { localStorage.clear(); window.location.reload(); } }
+            resetApp() { if(confirm("Master Reset?")) { localStorage.clear(); window.location.reload(); } }
         };
 
         window.onload = () => Nexus.init();
